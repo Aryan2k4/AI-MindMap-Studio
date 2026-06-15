@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI MindMap Studio - Interactive Concept Mapping</title>
+  <!-- Google Fonts: Outfit and Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Lucide Icons for premium icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-aura-dark">
+  <!-- Dynamic Glowing Background Gradients -->
+  <div class="bg-glow bg-glow-1"></div>
+  <div class="bg-glow bg-glow-2"></div>
+
+  <div class="app-container">
+    <!-- Sidebar Controls & Settings -->
+    <aside class="sidebar glass">
+      <div class="brand">
+        <div class="logo-icon">
+          <i data-lucide="git-branch" class="pulse-icon"></i>
+        </div>
+        <div class="brand-text">
+          <h1>MindMap Studio</h1>
+          <span>Powered by Gemini 2.0</span>
+        </div>
+      </div>
+
+      <div class="sidebar-scroll">
+        <!-- Section: Create Mindmap -->
+        <section class="control-section">
+          <h2><i data-lucide="sparkles"></i> Generate New Concept</h2>
+          <div class="input-group">
+            <textarea id="promptInput" placeholder="Describe what you want to visualize (e.g. 'How photosynthesis works', 'Architecture of Microservices', 'Roman Empire Timeline')"></textarea>
+            <button id="generateBtn" class="btn btn-primary">
+              <span>Generate Map</span>
+              <i data-lucide="arrow-right"></i>
+            </button>
+          </div>
+          
+          <div class="presets">
+            <span class="presets-label">Try these:</span>
+            <div class="preset-badges">
+              <button class="preset-badge" data-prompt="Quantum Computing Core Concepts">Quantum Physics</button>
+              <button class="preset-badge" data-prompt="Web Application Deployment Lifecycle">Web Deployment</button>
+              <button class="preset-badge" data-prompt="Human Brain Structure and Functions">Brain Anatomy</button>
+              <button class="preset-badge" data-prompt="How the Internet Works (Step-by-Step)">Internet Protocol</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section: Node Inspector -->
+        <section class="control-section inspector-section hidden" id="inspector">
+          <h2><i data-lucide="info"></i> Node Inspector</h2>
+          <div class="inspector-card glass">
+            <span class="node-badge" id="inspectorNodeGroup">Group Name</span>
+            <h3 id="inspectorNodeLabel">Selected Node Label</h3>
+            <p id="inspectorNodeDesc">Click a node to view details or expand it dynamically.</p>
+            
+            <div class="inspector-actions">
+              <button id="expandNodeBtn" class="btn btn-secondary btn-sm">
+                <i data-lucide="git-commit"></i>
+                <span>Expand AI Nodes</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section: Customization -->
+        <section class="control-section">
+          <h2><i data-lucide="palette"></i> Themes</h2>
+          <div class="theme-grid">
+            <button class="theme-btn active" data-theme="aura-dark" style="background: linear-gradient(135deg, #130f40, #000000);">
+              <span class="dot" style="background-color: #a29bfe;"></span> Aura
+            </button>
+            <button class="theme-btn" data-theme="cyberpunk" style="background: linear-gradient(135deg, #2b0030, #000000);">
+              <span class="dot" style="background-color: #ff007f;"></span> Cyberpunk
+            </button>
+            <button class="theme-btn" data-theme="emerald" style="background: linear-gradient(135deg, #093028, #000000);">
+              <span class="dot" style="background-color: #00b894;"></span> Emerald
+            </button>
+            <button class="theme-btn" data-theme="light" style="background: linear-gradient(135deg, #f5f6fa, #ffffff);">
+              <span class="dot" style="background-color: #0984e3;"></span> Light
+            </button>
+          </div>
+        </section>
+
+        <!-- Section: Actions -->
+        <section class="control-section">
+          <h2><i data-lucide="download"></i> Actions</h2>
+          <div class="action-buttons">
+            <button id="exportImageBtn" class="btn btn-outline btn-block">
+              <i data-lucide="image"></i>
+              <span>Export as PNG</span>
+            </button>
+            <button id="resetGraphBtn" class="btn btn-outline btn-block">
+              <i data-lucide="rotate-ccw"></i>
+              <span>Reset Canvas View</span>
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <div class="sidebar-footer">
+        <p>Double-click nodes to expand them</p>
+      </div>
+    </aside>
+
+    <!-- Interactive Graph Workspace -->
+    <main class="canvas-container" id="canvasContainer">
+      <!-- Grid background -->
+      <div class="canvas-grid"></div>
+
+      <!-- Instruction overlay -->
+      <div class="canvas-instruction" id="canvasInstruction">
+        <i data-lucide="compass" class="bounce"></i>
+        <h2>Welcome to AI MindMap Studio</h2>
+        <p>Enter a prompt in the sidebar or select a preset to generate a beautiful, interactive concept map.</p>
+      </div>
+
+      <!-- Zoom/Pan controls -->
+      <div class="canvas-controls glass">
+        <button id="zoomInBtn" title="Zoom In"><i data-lucide="plus"></i></button>
+        <button id="zoomOutBtn" title="Zoom Out"><i data-lucide="minus"></i></button>
+        <button id="zoomResetBtn" title="Reset View"><i data-lucide="maximize-2"></i></button>
+      </div>
+
+      <!-- Viewport that translates/scales -->
+      <div class="canvas-viewport" id="canvasViewport">
+        <!-- SVG for connections (drawn behind HTML nodes) -->
+        <svg class="connections-layer" id="connectionsLayer"></svg>
+        
+        <!-- Container for HTML nodes -->
+        <div class="nodes-layer" id="nodesLayer"></div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Fullscreen Loading Spinner Overlay -->
+  <div class="loading-overlay hidden" id="loadingOverlay">
+    <div class="loader-card glass">
+      <div class="loader-spinner"></div>
+      <h3 id="loadingTitle">Gemini is structuring your thoughts...</h3>
+      <p id="loadingSubtitle">Crafting nodes, weaving connections, and styling the layout.</p>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
